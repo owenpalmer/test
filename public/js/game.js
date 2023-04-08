@@ -70,7 +70,7 @@ function create() {
         var newNode = {x: nodeData.x, y: nodeData.y, color: nodeData.y, text: nodeData.text};
         console.log(newNode);
         // nodes.push(newNode);
-        drawNode(self, nodeData.text);
+        drawNode(self, nodeData.text, newNode);
         // emit a message to all players a new node was added
     });
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -90,7 +90,7 @@ function addPlayer(self, playerInfo) {
     self.ship.setAngularDrag(100);
     self.ship.setMaxVelocity(200);
     camera.startFollow(self.ship);
-        camera.setZoom(0.8);
+    camera.setZoom(0.8);
 }
 function addOtherPlayers(self, playerInfo) {
     const otherPlayer = self.add.sprite(playerInfo.x, playerInfo.y, 'otherPlayer').setOrigin(0.5, 0.5).setDisplaySize(53, 40);
@@ -103,13 +103,13 @@ function addOtherPlayers(self, playerInfo) {
     self.otherPlayers.add(otherPlayer);
 }
 
-function drawNode(self, str){
+function drawNode(self, str, node){
     font_size = 16;
     wrap_width = 19;
 
     console.log(self.ship.x);
     height = (Math.ceil(str.length/wrap_width) * 18) + 18;
-    sprite = self.add.sprite(400, 300, 'node').setDisplaySize(200, height);
+    sprite = self.add.sprite(node.x, node.y, 'node').setDisplaySize(200, height);
     sprite.inputEnabled = true;
 
     style = { font: `${font_size}px Courier New`, fill: "#ff0044", wordWrap: true, wordWrapWidth: 50, align: "left", backgroundColor: "#ffff00" };
@@ -120,7 +120,7 @@ function drawNode(self, str){
         // chunks.push(str.substring(i, i + chunkSize));
         chunk = str.substring(i, i + wrap_width);
         // console.log(chunk);
-        text = self.add.text(310, (300-(height/2))+(line*font_size), chunk, style);
+        text = self.add.text(node.x-80, (node.y-(height/2))+(line*font_size), chunk, style);
     }
     // this.socket.emit('newNode', {x: this.ship.x, y: this.ship.y, color: this.ship.team, text: 'hello'})
 }
