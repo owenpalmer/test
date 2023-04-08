@@ -43,7 +43,7 @@ io.on('connection', function (socket) {
         console.log(newNode);
         nodes.push(newNode);
         // emit a message to all players a new node was added
-        io.emit('nodeAdded', { x: nodeData.x, y: nodeData.y, color: nodeData.y, text: nodeData.text });
+        io.emit('nodeAdded', { x: nodeData.x, y: nodeData.y, color: nodeData.y, text: nodeData.text, range: nodeData.range });
     });
 });
 server.listen(8081, function () {
