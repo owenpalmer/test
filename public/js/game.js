@@ -69,7 +69,7 @@ function create() {
         // create new node object 
         var newNode = {x: nodeData.x, y: nodeData.y, color: nodeData.y, text: nodeData.text};
         console.log(newNode);
-        nodes.push(newNode);
+        // nodes.push(newNode);
         drawNode(self, nodeData.text);
         // emit a message to all players a new node was added
     });
@@ -133,6 +133,8 @@ function update() {
         }
         if (this.keys.create_node._justDown) {
             textarea.style.display = 'none';
+            // drawNode(this, "test");
+
             this.socket.emit('newNode', {x: this.ship.x, y: this.ship.y, color: this.ship.team, text: textarea.value})
         }
 
