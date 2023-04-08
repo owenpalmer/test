@@ -24,6 +24,7 @@ function preload() {
     this.load.image('node', 'assets/node.png');
     this.load.image('check', 'assets/check.png');
     this.load.image('new_node', 'assets/new_node.png');
+    this.load.image('cancel', 'assets/cancel.png');
 }
 
 
@@ -34,7 +35,11 @@ function create() {
         new_node: Phaser.Input.Keyboard.KeyCodes.ONE,
         create_node: Phaser.Input.Keyboard.KeyCodes.TWO,
         ZoomIn: Phaser.Input.Keyboard.KeyCodes.NINE,
-        ZoomOut: Phaser.Input.Keyboard.KeyCodes.EIGHT
+        ZoomOut: Phaser.Input.Keyboard.KeyCodes.EIGHT,
+        up: Phaser.Input.Keyboard.KeyCodes.UP,
+        down: Phaser.Input.Keyboard.KeyCodes.DOWN,
+        left: Phaser.Input.Keyboard.KeyCodes.LEFT,
+        right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
     });
     var self = this;
     this.socket = io();
@@ -74,7 +79,7 @@ function create() {
         drawNode(self, nodeData.text, newNode);
         // emit a message to all players a new node was added
     });
-    this.cursors = this.input.keyboard.createCursorKeys();
+    // this.cursors = this.input.keyboard.createCursorKeys();
 
     let bg = this.add.image(0, 0, "sky").setOrigin(0, 0);
     camera = this.cameras.main;
@@ -83,11 +88,22 @@ function create() {
     // button.on('pointerdown', function () {
     //     console.log('asdf');
     // });
+    cancel = this.add.sprite(0, 0, 'cancel');
+    cancel.setOrigin(0.0, 0.0).setDisplaySize(180,100);
+    cancel.setInteractive();
+    cancel.visible = false;
+    cancel.on('pointerdown', function () {
+        textarea.style.display = 'none';
+        new_post.visible = true;
+        cancel.visible = false;
+    });
     new_post = this.add.sprite(0, 0, 'new_node');
     new_post.setOrigin(0.0, 0.0).setDisplaySize(180,100);
     new_post.setInteractive();
     new_post.on('pointerdown', function () {
-        console.log('asdfjkl');
+        textarea.style.display = 'block';
+        cancel.visible = true;
+        new_post.visible = false;
     });
 }
 function addPlayer(self, playerInfo) {
@@ -142,6 +158,8 @@ function update() {
     if (this.ship) {
         new_post.x = camera.scrollX - 100;
         new_post.y = camera.scrollY + camera.height - 30;
+        cancel.x = camera.scrollX - 100;
+        cancel.y = camera.scrollY + camera.height - 30;
 
         const targetX = this.ship.x - (camera.width / 2);
         const targetY = this.ship.y - (camera.height / 2);
@@ -158,19 +176,19 @@ function update() {
         }
 
         speed = 5;
-        if (this.cursors.left.isDown) {
+        if (this.keys.left.isDown) {
             this.ship.x -= speed;
         }
 
-        if (this.cursors.right.isDown) {
+        if (this.keys.right.isDown) {
             this.ship.x += speed;
         }
 
-        if (this.cursors.up.isDown) {
+        if (this.keys.up.isDown) {
             this.ship.y -= speed;
         }
 
-        if (this.cursors.down.isDown) {
+        if (this.keys.down.isDown) {
             this.ship.y += speed;
         }
 
