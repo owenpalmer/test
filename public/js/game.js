@@ -3,6 +3,7 @@ var config = {
     parent: 'phaser-example',
     width: 800,
     height: 600,
+    backgroundColor: "#313a3b",
     physics: {
         default: 'arcade',
         arcade: {
@@ -19,8 +20,8 @@ var config = {
 var game = new Phaser.Game(config);
 // var nodes = [];
 function preload() {
-    this.load.image('ship', 'assets/spaceShips_001.png');
-    this.load.image('otherPlayer', 'assets/enemyBlack5.png');
+    this.load.image('otherPlayer', 'assets/husky.png');
+    this.load.image('ship', 'assets/coug.png');
     this.load.image('node', 'assets/node.png');
     this.load.image('check', 'assets/check.png');
     this.load.image('new_node', 'assets/new_node.png');
@@ -95,6 +96,11 @@ function create() {
         drawNode(self, newNode);
         // emit a message to all players a new node was added
     });
+    this.socket.on('lineAdded', function (x,y,x2,y2) {
+        let graphics = self.add.graphics();
+        graphics.lineStyle(10, 0xff0000, 1);
+        graphics.lineBetween(x, y, x2, y2);
+    });
     // this.cursors = this.input.keyboard.createCursorKeys();
 
     let bg = this.add.image(0, 0, "sky").setOrigin(0, 0);
@@ -110,10 +116,13 @@ function create() {
         cancel.visible = false;
         self.socket.emit('newNode', { x: self.ship.x, y: self.ship.y, color: self.ship.team, text: textarea.value })
     });
+    post_button.setDepth(100);
     reply_post_button = this.add.sprite(0, 0, 'post');
     reply_post_button.setOrigin(0.0, 0.0).setDisplaySize(180,100);
     reply_post_button.setInteractive();
     reply_post_button.visible = false;
+    reply_post_button.setDepth(100);
+    old = 0;
     reply_post_button.on('pointerdown', function () {
         textarea.style.display = 'none';
         reply_post_button.visible = false;
@@ -121,8 +130,16 @@ function create() {
         // Redraw parent node
         console.log('parentes');
         console.log(parent_node);
+        // let graphics = self.add.graphics();
+        // graphics.lineStyle(10, 0xff0000, 1);
+        // graphics.lineBetween(parent_node.x, parent_node.y, self.ship.x, self.ship.y);
+        // drawLine(parent_node.x,parent_node.y,self.ship.x,self.ship.y);
+        // parent_node.old = true;
+        self.socket.emit('newLine', parent_node.x, parent_node.y, self.ship.x, self.ship.y)
+        old = 1;
         self.socket.emit('newNode', parent_node)
 
+        old = 0;
         console.log('text area');
         console.log(textarea.value);
         self.socket.emit('newNode', { x: self.ship.x, y: self.ship.y, color: self.ship.team, text: textarea.value })
@@ -137,6 +154,7 @@ function create() {
         cancel.visible = false;
         post_button.visible = false;
     });
+    cancel.setDepth(100);
     cancel_reply = this.add.sprite(0, 0, 'cancel');
     cancel_reply.setOrigin(0.0, 0.0).setDisplaySize(180,100);
     cancel_reply.setInteractive();
@@ -149,6 +167,7 @@ function create() {
         reply.visible = false;
         // post_button.visible = false;
     });
+    cancel_reply.setDepth(100);
     new_post = this.add.sprite(0, 0, 'new_node');
     new_post.setOrigin(0.0, 0.0).setDisplaySize(180,100);
     new_post.setInteractive();
@@ -159,6 +178,8 @@ function create() {
         new_post.visible = false;
         post_button.visible = true;
     });
+    new_post.setDepth(100);
+    new_post.setDepth(100);
     reply = this.add.sprite(0, 0, 'reply');
     reply.setOrigin(0.0, 0.0).setDisplaySize(180,100);
     reply.setInteractive();
@@ -171,6 +192,7 @@ function create() {
 
         console.log(selected_text);
     });
+    reply.setDepth(100);
     reply.visible = false;
     place = this.add.sprite(0, 0, 'place');
     place.setOrigin(0.0, 0.0).setDisplaySize(180,100);
@@ -181,15 +203,16 @@ function create() {
         place.visible = false;
         reply_post_button.visible = true;
     });
+    place.setDepth(100);
     place.visible = false;
 }
 function addPlayer(self, playerInfo) {
     self.ship = self.physics.add.image(playerInfo.x, playerInfo.y, 'ship').setOrigin(0.5, 0.5).setDisplaySize(53, 40);
-    if (playerInfo.team === 'blue') {
-        self.ship.setTint(0x0000ff);
-    } else {
-        self.ship.setTint(0xff0000);
-    }
+    // if (playerInfo.team === 'blue') {
+    //     self.ship.setTint(0x0000ff);
+    // } else {
+    //     self.ship.setTint(0xff0000);
+    // }
     self.ship.setDrag(100);
     self.ship.setAngularDrag(100);
     self.ship.setMaxVelocity(200);
@@ -202,36 +225,46 @@ function addPlayer(self, playerInfo) {
 }
 function addOtherPlayers(self, playerInfo) {
     const otherPlayer = self.add.sprite(playerInfo.x, playerInfo.y, 'otherPlayer').setOrigin(0.5, 0.5).setDisplaySize(53, 40);
-    if (playerInfo.team === 'blue') {
-        otherPlayer.setTint(0x0000ff);
-    } else {
-        otherPlayer.setTint(0xff0000);
-    }
+    // if (playerInfo.team === 'blue') {
+    //     otherPlayer.setTint(0x0000ff);
+    // } else {
+    //     otherPlayer.setTint(0xff0000);
+    // }
     otherPlayer.playerId = playerInfo.playerId;
     self.otherPlayers.add(otherPlayer);
 }
 
+positions = [];
+
 function drawNode(self, node) {
-    console.log("text!");
-    console.log(node.text);
+    // found = positions.find(e=>{
+    //     e.x == node.x && e.y == node.y;
+    // });
     str = node.text;
-    height = 200;
-    width = 400;
-    sprite = self.add.sprite(node.x, node.y, 'node').setOrigin(0.05,0.1).setDisplaySize(width, height);
-    sprite.setInteractive();
-    sprite.on('pointerdown', function () {
-        parent_node = node;
-        console.log('this is djsfklsdf');
-        console.log(str);
-        console.log(node.text);
-        text_select.value = node.text;
-        text_select.style.display = 'block';
-        new_post.visible = false;
-        cancel_reply.visible = true;
-        reply.visible = true;
-        post_button.visible = false;
-        console.log('asdf');
-    });
+    // if(old==0){
+        console.log("redraw!");
+        height = 200;
+        width = 400;
+        sprite = self.add.sprite(node.x, node.y, 'node').setOrigin(0.05,0.1).setDisplaySize(width, height);
+        sprite.setInteractive();
+        sprite.on('pointerdown', function () {
+            parent_node = node;
+            console.log('this is djsfklsdf');
+            console.log(str);
+            console.log(node.text);
+            text_select.value = node.text;
+            text_select.style.display = 'block';
+            new_post.visible = false;
+            cancel_reply.visible = true;
+            reply.visible = true;
+            post_button.visible = false;
+            console.log('asdf');
+        });
+        // positions.push({
+        //     x: node.x,
+        //     y: node.y,
+        // });
+    // }
     line_height = 20;
     line_width = 30;
     char_width = 12;
