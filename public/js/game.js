@@ -37,7 +37,7 @@ function create() {
     text_select = document.querySelector("#select");
     selected_text = "";
     select_range = {};
-    text_select.addEventListener('mouseout', (e)=>{
+    text_select.addEventListener('mouseout', (e) => {
         selected_text = window.getSelection().toString();
         select_range = {
             start: text_select.selectionStart - 1,
@@ -56,6 +56,7 @@ function create() {
         down: Phaser.Input.Keyboard.KeyCodes.DOWN,
         left: Phaser.Input.Keyboard.KeyCodes.LEFT,
         right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
+        five: Phaser.Input.Keyboard.KeyCodes.FIVE,
     });
     var self = this;
     this.socket = io();
@@ -89,25 +90,27 @@ function create() {
     });
     this.socket.on('nodeAdded', function (nodeData) {
         // create new node object 
-        var newNode = { x: nodeData.x, y: nodeData.y, color: nodeData.y, text: nodeData.text, range:nodeData.range };
+        var newNode = { x: nodeData.x, y: nodeData.y, color: nodeData.y, text: nodeData.text, range: nodeData.range };
         console.log('before draw');
         console.log(newNode);
         // nodes.push(newNode);
         drawNode(self, newNode);
         // emit a message to all players a new node was added
     });
-    this.socket.on('lineAdded', function (x,y,x2,y2) {
+    this.socket.on('lineAdded', function (x, y, x2, y2) {
         let graphics = self.add.graphics();
         graphics.lineStyle(10, 0xff0000, 1);
         graphics.lineBetween(x, y, x2, y2);
     });
+
+
     // this.cursors = this.input.keyboard.createCursorKeys();
 
     let bg = this.add.image(0, 0, "sky").setOrigin(0, 0);
     camera = this.cameras.main;
 
     post_button = this.add.sprite(0, 0, 'post');
-    post_button.setOrigin(0.0, 0.0).setDisplaySize(180,100);
+    post_button.setOrigin(0.0, 0.0).setDisplaySize(180, 100);
     post_button.setInteractive();
     post_button.visible = false;
     post_button.on('pointerdown', function () {
@@ -118,7 +121,7 @@ function create() {
     });
     post_button.setDepth(100);
     reply_post_button = this.add.sprite(0, 0, 'post');
-    reply_post_button.setOrigin(0.0, 0.0).setDisplaySize(180,100);
+    reply_post_button.setOrigin(0.0, 0.0).setDisplaySize(180, 100);
     reply_post_button.setInteractive();
     reply_post_button.visible = false;
     reply_post_button.setDepth(100);
@@ -145,7 +148,7 @@ function create() {
         self.socket.emit('newNode', { x: self.ship.x, y: self.ship.y, color: self.ship.team, text: textarea.value })
     });
     cancel = this.add.sprite(0, 0, 'cancel');
-    cancel.setOrigin(0.0, 0.0).setDisplaySize(180,100);
+    cancel.setOrigin(0.0, 0.0).setDisplaySize(180, 100);
     cancel.setInteractive();
     cancel.visible = false;
     cancel.on('pointerdown', function () {
@@ -156,7 +159,7 @@ function create() {
     });
     cancel.setDepth(100);
     cancel_reply = this.add.sprite(0, 0, 'cancel');
-    cancel_reply.setOrigin(0.0, 0.0).setDisplaySize(180,100);
+    cancel_reply.setOrigin(0.0, 0.0).setDisplaySize(180, 100);
     cancel_reply.setInteractive();
     cancel_reply.visible = false;
     cancel_reply.on('pointerdown', function () {
@@ -169,7 +172,7 @@ function create() {
     });
     cancel_reply.setDepth(100);
     new_post = this.add.sprite(0, 0, 'new_node');
-    new_post.setOrigin(0.0, 0.0).setDisplaySize(180,100);
+    new_post.setOrigin(0.0, 0.0).setDisplaySize(180, 100);
     new_post.setInteractive();
     new_post.on('pointerdown', function () {
         textarea.style.display = 'block';
@@ -181,7 +184,7 @@ function create() {
     new_post.setDepth(100);
     new_post.setDepth(100);
     reply = this.add.sprite(0, 0, 'reply');
-    reply.setOrigin(0.0, 0.0).setDisplaySize(180,100);
+    reply.setOrigin(0.0, 0.0).setDisplaySize(180, 100);
     reply.setInteractive();
     reply.on('pointerdown', function () {
         text_select.style.display = 'none';
@@ -195,7 +198,7 @@ function create() {
     reply.setDepth(100);
     reply.visible = false;
     place = this.add.sprite(0, 0, 'place');
-    place.setOrigin(0.0, 0.0).setDisplaySize(180,100);
+    place.setOrigin(0.0, 0.0).setDisplaySize(180, 100);
     place.setInteractive();
     place.on('pointerdown', function () {
         textarea.style.display = 'block';
@@ -242,36 +245,36 @@ function drawNode(self, node) {
     // });
     str = node.text;
     // if(old==0){
-        console.log("redraw!");
-        height = 200;
-        width = 400;
-        sprite = self.add.sprite(node.x, node.y, 'node').setOrigin(0.05,0.1).setDisplaySize(width, height);
-        sprite.setInteractive();
-        sprite.on('pointerdown', function () {
-            parent_node = node;
-            console.log('this is djsfklsdf');
-            console.log(str);
-            console.log(node.text);
-            text_select.value = node.text;
-            text_select.style.display = 'block';
-            new_post.visible = false;
-            cancel_reply.visible = true;
-            reply.visible = true;
-            post_button.visible = false;
-            console.log('asdf');
-        });
-        // positions.push({
-        //     x: node.x,
-        //     y: node.y,
-        // });
+    console.log("redraw!");
+    height = 200;
+    width = 400;
+    sprite = self.add.sprite(node.x, node.y, 'node').setOrigin(0.05, 0.1).setDisplaySize(width, height);
+    sprite.setInteractive();
+    sprite.on('pointerdown', function () {
+        parent_node = node;
+        console.log('this is djsfklsdf');
+        console.log(str);
+        console.log(node.text);
+        text_select.value = node.text;
+        text_select.style.display = 'block';
+        new_post.visible = false;
+        cancel_reply.visible = true;
+        reply.visible = true;
+        post_button.visible = false;
+        console.log('asdf');
+    });
+    // positions.push({
+    //     x: node.x,
+    //     y: node.y,
+    // });
     // }
     line_height = 20;
     line_width = 30;
     char_width = 12;
 
-    function cost(i){
+    function cost(i) {
         j = 0;
-        while(str[i] != " " && i < str.length) {
+        while (str[i] != " " && i < str.length) {
             i++;
             j++;
         }
@@ -280,24 +283,24 @@ function drawNode(self, node) {
 
     v = 0;
     line = 0;
-    for(c in str) {
-        if(str[c] == "\n") {
+    for (c in str) {
+        if (str[c] == "\n") {
             line++;
             v = -1;
         }
-        if(cost(c) + v > line_width) {
+        if (cost(c) + v > line_width) {
             line++;
             v = 0;
         } else {
         }
-        if(node.range){
-            if(c > node.range.start && c < node.range.end) {
-                self.add.text(node.x+(v*char_width), node.y+(line*line_height), str[c], { fontFamily: 'Courier, monospace', fontSize: '24px', fill: 'black', fontStyle: 'bold', backgroundColor: "red"});
+        if (node.range) {
+            if (c > node.range.start && c < node.range.end) {
+                self.add.text(node.x + (v * char_width), node.y + (line * line_height), str[c], { fontFamily: 'Courier, monospace', fontSize: '24px', fill: 'black', fontStyle: 'bold', backgroundColor: "red" });
             } else {
-                self.add.text(node.x+(v*char_width), node.y+(line*line_height), str[c], { fontFamily: 'Courier, monospace', fontSize: '24px', fill: 'black', fontStyle: 'bold'});
+                self.add.text(node.x + (v * char_width), node.y + (line * line_height), str[c], { fontFamily: 'Courier, monospace', fontSize: '24px', fill: 'black', fontStyle: 'bold' });
             }
         } else {
-            self.add.text(node.x+(v*char_width), node.y+(line*line_height), str[c], { fontFamily: 'Courier, monospace', fontSize: '24px', fill: 'black', fontStyle: 'bold'});
+            self.add.text(node.x + (v * char_width), node.y + (line * line_height), str[c], { fontFamily: 'Courier, monospace', fontSize: '24px', fill: 'black', fontStyle: 'bold' });
         }
         v++;
     }
@@ -354,6 +357,45 @@ function update() {
 
         if (this.keys.down.isDown) {
             this.ship.y += speed;
+        }
+
+        if (this.keys.five._justDown) {
+
+            this.socket.on('blackboardData', function (data) {
+                console.log(data)
+                if (data == 4) {
+                    this.ship.x -= 10;
+                }
+
+                if (data == 6) {
+                    this.ship.x += 10;
+                }
+
+                if (data == 8) {
+                    this.ship.y += 10;
+                }
+
+                if (data == 2) {
+                    this.ship.y -= 10;
+                }
+
+                // emit player movement
+                var x = this.ship.x;
+                var y = this.ship.y;
+                var r = this.ship.rotation;
+                if (this.ship.oldPosition && (x !== this.ship.oldPosition.x || y !== this.ship.oldPosition.y || r !== this.ship.oldPosition.rotation)) {
+                    this.socket.emit('playerMovement', { x: this.ship.x, y: this.ship.y, rotation: this.ship.rotation });
+                }
+                // save old position data
+                this.ship.oldPosition = {
+                    x: this.ship.x,
+                    y: this.ship.y,
+                    rotation: this.ship.rotation
+                };
+
+            }.bind(this));
+
+
         }
 
         if (this.keys.ZoomIn.isDown) {

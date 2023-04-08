@@ -1,3 +1,20 @@
+const SerialPort = require('serialport');
+const Readline = require('@serialport/parser-readline');
+
+const port = new SerialPort('COM4', { baudRate: 115200 });
+const parser = port.pipe(new Readline({ delimiter: '\n' }));
+
+// Read the port data
+port.on("open", () => {
+  console.log('serial port open');
+});
+
+parser.on('data', data =>{
+  console.log(data);
+  io.emit('blackboardData', data);
+});
+
+
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
